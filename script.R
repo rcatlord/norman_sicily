@@ -19,20 +19,19 @@ map <- leaflet() %>%
   addAwesomeMarkers(data = pts, icon = icon, popup = popup,
                     label = ~name, labelOptions = labelOptions(opacity = 0),
                     group = 'sites') %>% 
-  addLayersControl(position = 'bottomleft',
+  addLayersControl(position = 'bottomright',
                    baseGroups = c("Road map", "Satellite", "Terrain"),
                    options = layersControlOptions(collapsed = FALSE)) %>% 
-  addEasyButton(easyButton(
-    icon='fa-home', title='Reset',
-    onClick=JS("function(btn, map){ map.setView([37.599994, 14.015356], 8);}"))) %>%
-  addEasyButton(easyButton(
-    icon="fa-location-arrow", title="Locate Me",
-    onClick=JS("function(btn, map){ map.locate({setView: true}); }"))) %>% 
-  addSearchMarker(targetGroup = 'sites',
-    options = searchMarkersOptions(zoom = 14, openPopup = TRUE)) %>% 
-  addControl("<strong>Search for Norman art and architecture in Sicily</strong>
-             <br><em>Click popup image for Wikipedia entry</em>",
-             position = 'bottomright')
+  addSearchFeatures(targetGroups = 'sites',
+    options = searchFeaturesOptions(zoom = 12, openPopup = TRUE, firstTipSubmit = TRUE,
+      autoCollapse = TRUE, hideMarkerOnCollapse = TRUE)) %>% 
+  addControl("<strong>Art and architecture in Norman Sicily</strong>",
+             position = 'topright') %>%
+  htmlwidgets::onRender(paste0("
+                               function(el, x) {
+                               $('head').append(","\'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\'",");
+                               }"))
 
 library(htmlwidgets)
-saveWidget(map, file = "index.html")
+saveWidget(map, file = "index.html",
+           title = "Norman Sicily")

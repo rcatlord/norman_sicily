@@ -1,27 +1,28 @@
 ## Norman art and architecture in Sicily ##
 
-library(tidyverse); library(sf) ; library(leaflet) ; library(leaflet.extras)
-pts <- read_csv("data/sites.csv")
-pts <- st_as_sf(pts, coords = c("lon", "lat"), crs = 4326)
+library(tidyverse); library(sf) ; library(leaflet) ; library(leaflet.extras) ; library(htmlwidgets)
 
-popup <- paste0("<p align=\"center\"><em>", pts$detail, "</em><br/><br/>",
-                "<a href='",  pts$url, "' target='_blank'><img style = 'height: 100px;' src = ", pts$image, ">",
-                "</a><br/>", "<strong>", pts$name, "</strong>", "<br/>", pts$date)
+sf <- read_csv("data/sites.csv") %>% st_as_sf(coords = c("lon", "lat"), crs = 4326)
 
-icon <- awesomeIcons(icon = "fa-map-marker", library = "fa", markerColor = "lightgreen", 
-                     squareMarker = TRUE)
+popup <- paste0("<p style='text-align: center; font-weight: 400; line-height: 19px; font-family: \"Georgia\", serif; font-size: 15px;'><strong>", sf$name, ", (", sf$date, ")</strong><br/>",
+                "<a href='",  sf$url, "' target='_blank'><img style = 'height: 120px; padding-top:5px;' src = ", sf$image, "></a><br/><span style='color: #777;'>",
+                sf$location, "</span><br/>",
+                sf$detail, "</p>")
+
+icon <- awesomeIcons(icon = "fa-map-marker", library = "fa", markerColor = "lightgreen")
 
 map <- leaflet() %>%
-  setView(14.015356, 37.599994, zoom = 8) %>% 
+  setView(13.352104, 38.122561, zoom = 12) %>% 
   addProviderTiles(providers$CartoDB.Positron, options = tileOptions(minZoom = 5, maxZoom = 17), group = "Road map") %>% 
   addProviderTiles(providers$Esri.WorldImagery, options = tileOptions(minZoom = 5, maxZoom = 17), group = "Satellite") %>%
   addProviderTiles(providers$Stamen.TerrainBackground, options = tileOptions(minZoom = 5, maxZoom = 17), group = "Terrain") %>%
-  addAwesomeMarkers(data = pts, icon = icon, popup = popup,
+  addAwesomeMarkers(data = sf, icon = icon, popup = popup,
                     label = ~name, labelOptions = labelOptions(opacity = 0),
                     group = 'sites') %>% 
   addLayersControl(position = 'bottomright',
                    baseGroups = c("Road map", "Satellite", "Terrain"),
                    options = layersControlOptions(collapsed = FALSE)) %>% 
+  addFullscreenControl() %>% 
   addSearchFeatures(targetGroups = 'sites',
     options = searchFeaturesOptions(zoom = 12, openPopup = TRUE, firstTipSubmit = TRUE,
       autoCollapse = TRUE, hideMarkerOnCollapse = TRUE)) %>% 
@@ -32,6 +33,5 @@ map <- leaflet() %>%
                                $('head').append(","\'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\'",");
                                }"))
 
-library(htmlwidgets)
 saveWidget(map, file = "index.html",
            title = "Norman Sicily")
